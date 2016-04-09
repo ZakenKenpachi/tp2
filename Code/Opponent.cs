@@ -109,8 +109,8 @@ namespace CMIYC
             }
             if (numero == 2)
             {
-                position.Y = 8;
-                position.X = 10;
+                position.Y = 10;
+                position.X = 8;
                 maze.SetElementAt(position.X, position.Y, Element.Opponent);
             }
             if (numero == 3)
@@ -173,7 +173,7 @@ namespace CMIYC
                         int newY = rnd.Next(0, 19);
                         //New vector targetPt représentant le mode fuite.
                         targetPt = new Vector2i(newX, newY);
-                        Direction dir = FindShortestPath(maze, position.X, position.Y, targetPt.X, targetPt.Y);
+                        Direction dir = PathFinder.FindShortestPath(maze, position.X, position.Y, targetPt.X, targetPt.Y);
                         Move(dir, maze);
                     }
                     //Si la star n'est pas activée.
@@ -193,7 +193,7 @@ namespace CMIYC
                         else
                         {
                             //Utilisation du lastKnowPosition pour trouver la direction.
-                            dir = FindShortestPath(maze, position.X, position.Y, lastKnownPosition.X, lastKnownPosition.Y);
+                            dir = PathFinder.FindShortestPath(maze, position.X, position.Y, targetPt.X, targetPt.Y);
                             //Déplacement en utilisant la direction de l'algorithme récursif.
                             Move(dir, maze);
                         }
