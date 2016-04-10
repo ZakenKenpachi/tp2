@@ -2,72 +2,54 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.IO;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace CMIYC
 {
     public class Grid
     {
-        //Tableau 2D contenant l'identification des elements de jeu.
         private Element[,] mazeElement;
         //Valeur numerique entiere representant le nombre de colonne.
         private int mazeHeight = 19;
         //Valeur numerique entiere representant le nombre de ligne.
         private int mazeWidth = 17;
-
-        /// <summary>
-        /// Constructeur de la classe grid.
-        /// </summary>
-        public Grid()
+        //Chemin du fichier text.
+        string path = "Levels/maze01.txt";
+         public Grid()
         {
-            InitForm();
+            InitFrom(path);
         }
-
-        /// <summary>
-        /// Methode appelee lorsque l'on souhaite cree la grid
-        /// </summary>
-        public void InitForm()
+        public void InitFrom(string path)
         {
-            // Exemple de lecture d'un fichier texte
-            string path = "Levels/maze01.txt";
-
+            
             // Si le fichier existe
             if (File.Exists(path))
             {
-                //Tableau 2D de char contenant les chars du fichier texte et allant etre
-                //utilise plus loin pour le tableau d'element.
-                char[,] contenu = new char[mazeHeight, mazeWidth];
-                //Tableau de string contenant les lines du fichier texte.
                 string[] lines = File.ReadAllLines(path);
-                //Boucle for inbrique parcourant le tableau de lines.
-                for (int i = 0; i < mazeHeight; i++)
+                char[,] tab2d = new char[17, 19];
+                for (int i = 0; i < lines.Length; i++)
                 {
-                    for (int j = 0; j < mazeWidth * 2; j++)
+                    string[] splitTemp = lines[i].Split(',');
+                    for (int j = 0; j < splitTemp.Length; j++)
                     {
-                        //Verifie si la valeur du j est pair (correspont au valeur char que l'on souhaite recevoir)
-                        if (j % 2 == 0)
-                        {
-                            contenu[i, j / 2] = lines[i][j];
-                            lines[i].Split(',');
-                        }
+                        tab2d[j,i] = splitTemp[j][0]; 
                     }
                 }
-                //Creation du tableau d'element.
-                mazeElement = new Element[mazeHeight, mazeWidth];
+                mazeElement = new Element[mazeWidth, mazeHeight];
                 //Boucle for imbrique allant etre utilise pour comparer les cases du tableau contenu et mazeElement.
-                for (int i = 0; i < mazeHeight; i++)
+                for (int i = 0; i < mazeWidth; i++)
                 {
-                    for (int j = 0; j < mazeWidth; j++)
+                    for (int j = 0; j < mazeHeight; j++)
                     {
                         //Identifie la valeur des cases dans le tableau de char et asigne
                         //une valeur Element dans les cases jummelles de la grid dependament
                         //du char.
-                        if (contenu[i, j] == '1')
+                        if (tab2d[i, j] == '1')
                         {
                             mazeElement[i, j] = Element.Wall;
                         }
-                        if (contenu[i, j] == '0')
+                        if (tab2d[i, j] == '0')
                         {
                             mazeElement[i, j] = Element.None;
                         }
@@ -75,60 +57,35 @@ namespace CMIYC
                 }
             }
         }
-
-        /// <summary>
-        /// Methode appelee lorsque l'on souhaite savoir le nombre de ligne dans la grid.
-        /// </summary>
-        /// <returns>Valeur numerique representant le nombre de ligne.</returns>
+        public int GetWidth()
+        {
+            return mazeWidth;
+        }
         public int GetHeight()
         {
             return mazeHeight;
         }
-
-        /// <summary>
-        /// Methode que l'on appel lorsque l'on souhaite savoir la valeur d'une case dans la grid.
-        /// </summary>
-        /// <param name="row">Valeur entiere de la ligne que l'on va chercher.</param>
-        /// <param name="colonne">Valeur entiere de la colonne que l'on va chercher.</param>
-        /// <returns>La valeur Element de la case chercher.</returns>
-        public Element GetMazeElementAt(int colonne, int row)
+        public void SetElementAt(int column, int row, Element ele)
         {
             //Verifie si les valeurs de row et colonne sont inclus dans le tableau.
-            if (row < mazeHeight && colonne < mazeWidth)
+            if (row < mazeHeight && column < mazeWidth)
             {
-                return mazeElement[row, colonne];
+                mazeElement[column, row] = ele;
+            }
+
+        }
+        public Element GetMazeElementAt(int column, int row)
+        {
+            //Verifie si les valeurs de row et colonne sont inclus dans le tableau.
+            if (row < mazeHeight && column < mazeWidth)
+            {
+                return mazeElement[column,row];
             }
             else
             {
                 return Element.None;
             }
         }
-
-        /// <summary>
-        /// Methode qu'on appel lorsque l'on souhaite changer la valeur d'une case de la grid.
-        /// </summary>
-        /// <param name="row">Valeur numerique de la ligne de la case que l'on va modifier.</param>
-        /// <param name="colonne">Valeur numerique de la colonne de la case que l'on va modifier.</param>
-        /// <param name="ele">Valeur de l'element que l'on souhaite remplacer le contenue de la case.</param>
-        public void SetElementAt(int colonne, int row, Element ele)
-        {
-            //Verifie si les valeurs de row et colonne sont inclus dans le tableau.
-            if (row < mazeHeight && colonne < mazeWidth)
-            {
-                mazeElement[row, colonne] = ele;
-            }
-
-        }
-
-        /// <summary>
-        /// Methode appelee lorsque l'on souhaite savoir le nombre de colonne dans la grid.
-        /// </summary>
-        /// <returns>Valeur numerique representant le nombre de colonne.</returns>
-        public int GetWidth()
-        {
-            return mazeWidth;
-        }
-
+        
     }
 }
-

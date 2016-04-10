@@ -61,12 +61,12 @@ namespace CMIYC
                 if (result == EndGameResult.Win)
                 {
                     // Signaler la victoire
-                    gameIsOver = true;
+                    Game.GetInstance().HandleEndOfGame(result);
                 }
                 else if (result == EndGameResult.Lost)
                 {
                     // Signaler la défaite
-                    gameIsOver = true;
+                    Game.GetInstance().HandleEndOfGame(result);
                 }
                 else
                 {
@@ -78,6 +78,5 @@ namespace CMIYC
                 }
             }
         }
-
     }
 }
