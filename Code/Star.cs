@@ -17,7 +17,7 @@ namespace CMIYC
         //Durée de vie d'une étoile dans le jeu.
         public static int STAR_VISIBILITY_DURATION = 10;
         //Variable qui connait si l'étoile a été ramassée.
-        public bool heroHasPickedUpStar = false;
+        public bool heroHasPickedUpStar = true;
         //Création de la sprite pour l'étoile.
         private Sprite starSprite = null;
         //Création de la texture de l'étoile.

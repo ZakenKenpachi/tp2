@@ -1,6 +1,4 @@
-﻿//Jeu de Catch me if you can, créé par Alexandre Bélisle-Huard et David Aupin.
-//ABH = le code pour le nom d'Alexandre et DA = le code pour David.
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Linq;
@@ -9,7 +7,6 @@ using System.Text;
 using System.Threading.Tasks;
 using SFML.Graphics;
 using SFML.System;
-using SFML.Window;
 
 namespace CMIYC
 {
@@ -18,6 +15,7 @@ namespace CMIYC
     /// </summary>
     public class Game
     {
+
         // Taille en largeur de la fenêtre de jeu
         public const int GAME_WIDTH = 544;
         // Taille en hauteur de la fenêtre de jeu
@@ -39,9 +37,9 @@ namespace CMIYC
         //Sprite d'une case vide.
         Sprite noneSprite = null;
         //Texture d'une case vide.
-        Texture noneTexture = new Texture("None.bmp");
+        Texture noneTexture = new Texture("Arts\\None.bmp");
         //Tableau contenant les ennemis.
-        private Opponent[] tabOpponents = null;
+        private Opponent[] tabOpponent = new Opponent[NB_OPPONENT];
         //Création de l'étoile du jeu.
         private Star theStar = null;
         //Création du héro.
@@ -49,173 +47,101 @@ namespace CMIYC
         //Création du nom de l'instance du singleton.
         static Game instance = null;
         //Création du font pour le temps affiché.
-        private Font timeFont = new Font("comic.ttf");
+        //private Font timeFont = new Font("arial.ttf");
         //Création de la variable text pour le temps.
         private Text timeText = null;
         //Création de la sprite pour les murs.
         private Sprite wallSprite = null;
         //Création de la texture pour les murs.
-        private Texture wallTexture = new Texture("Wall.bmp");
+        private Texture wallTexture = new Texture("Arts\\Wall.bmp");
         //Création de l'instance de la grille de jeu.
         private Grid maze = new Grid();
         //Creation du timer.
         private Clock timer;
 
-        /// <summary>
-        /// Constructeur de la classe Game.
-        /// </summary>
-        private Game ()
+
+
+        //À Completer...0
+        private Game()
         {
+            for (int i = 0; i < tabOpponent.Length; i++)
+            {
+                tabOpponent[i] = new Opponent(i, maze);
+            }
             timer = new Clock();
-            timeText = new Text("", timeFont);
-            tabOpponents = new Opponent[NB_OPPONENT] { new Opponent(1, maze), new Opponent(1, maze), new Opponent(1, maze), new Opponent(1, maze) };
+            //timeText = new Text("aaaa", timeFont);
         }
-        /// <summary>
-        /// Singleton qui crée une instance s'il n'y en a pas ou retourne l'instance existante.
-        /// </summary>
-        /// <returns>Retourne l'instance de la partie.</returns>
-        public static Game GetInstance ()
+        //public DateTime GetStartTime()
+        //{
+        //    return gameBeginTime;
+        //}
+        public static Game GetInstance()
         {
-            //Regarde s'il y a déjà une instance de créée
             if (instance == null)
             {
-                instance = new Game(); //Sinon crée une nouvelle instance.
-                return instance; //Retourne l'instance créée.
+                instance = new Game();
+                return instance;
             }
-            else return instance; //Retourne l'instance existante.
+            else return instance;
         }
-        /// <summary>
-        /// Fonction qui update le jeu et qui décide si la partie doit continuer ou finir.
-        /// </summary>
-        /// <returns>Retourne le résultat de la partie, soit gagné, perdu ou encore en jeu.</returns>
-        public EndGameResult Update ()
+        public EndGameResult Update()
         {
-            theStar = new Star();
-            timeText.DisplayedString = "Temps restant:" + GetRemainingTime().ToString();
-            //Vérifie si l'étoile est visible et si elle est déjà activée.
-            if (theStar.IsStarVisible() && !theStar.IsStarActivated())
-            {
-                maze.SetElementAt(8, 9, Element.Star);
-            }
-            for (int i = 0; i < tabOpponents.Length; i++)
-            {
-                tabOpponents[i].Update(maze, hero, theStar.IsStarActivated());
-            }
-            if (GetRemainingTime() == 0)
-            {
-                return EndGameResult.Win;
-            }
-            for (int i = 0; i < tabOpponents.Length; i++)
-            {
-                if (hero.GetPosition() == tabOpponents[i].GetPosition())
-                {
-                    return EndGameResult.Lost;
-                }
-            }
+            //timeText.DisplayedString = "Temps restant:" + GetRemainingTime().ToString();
+            //StarPopUp();
             return EndGameResult.NotFinished;
         }
-        /// <summary>
-        /// Fonction qui donne le temps restant à la partie.
-        /// </summary>
-        /// <returns>La valeur du temps restant à la partie</returns>
-        public int GetRemainingTime ()
+        public int GetRemainingTime()
         {
             return 120 - (int)timer.ElapsedTime.AsSeconds();
         }
-        /// <summary>
-        /// Fonction qui gère la fin de partie.
-        /// </summary>
-        public void HandleEndOfGame (EndGameResult result)
+        
+        public void Draw(RenderWindow window)
         {
-            string message = "";
-            string title = "Partie Terminée";
-            if (result == EndGameResult.Win)
+
+
+            for (int i = 0; i < maze.GetWidth(); i++)
             {
-                message = "Bravo, vous avez survécu! Voulez-vous rejouer?";
-            }
-            else if (result == EndGameResult.Lost) 
-            {
-                message = "Vous avez été mangé! Voulez-vous rejouer?";
-            }
-            DialogResult question = MessageBox.Show(message, title, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-            if (DialogResult.No == question)
-            {
-                // Quitter le jeu
-                System.Environment.Exit(0);
-            }
-            else
-            {
-                // Redémarrer
-                InitializeNewGame();
-            }
-        }
-        /// <summary>
-        /// Initialise une nouvelle partie.
-        /// </summary>
-        public void InitializeNewGame() 
-        {
-            maze.InitFrom("Levels/maze01.txt");
-            timer.Restart();
-            maze.SetElementAt(8,9,Element.Hero);
-            hero.SetX(8);
-            hero.SetY(9);
-            theStar.ActivateStar();
-            maze.SetElementAt(8,10,Element.Opponent);
-            maze.SetElementAt(8,8,Element.Opponent);
-            maze.SetElementAt(9,9,Element.Opponent);
-            maze.SetElementAt(7,9,Element.Opponent);
-        }
-        /// <summary>
-        /// Fonction qui dessine les objets à l'écran.
-        /// </summary>
-        /// <param name="window">La fenètre de jeu</param>
-        public void Draw (RenderWindow window)
-        {
-            for (int i = 0; i < maze.GetWidth(); i++)   
-            {
-                for (int j = 0; j < maze.GetHeight(); j++) //Deux for inbriqués pour parcourir le tableau entier.
+                for (int j = 0; j < maze.GetHeight(); j++)
                 {
-                    //Dessine les murs.
                     if (maze.GetMazeElementAt(i, j) == Element.Wall)
                     {
                         wallSprite = new Sprite(wallTexture);
                         wallSprite.Position = new Vector2f(i * DEFAULT_GAME_ELEMENT_WIDTH, j * DEFAULT_GAME_ELEMENT_HEIGHT);
                         window.Draw(wallSprite);
                     }
-                    //Dessine le héros.
+                    if(maze.GetMazeElementAt(i,j) == Element.Opponent) 
+                    {
+                       for (int k = 0; k < tabOpponent.Length; k++)
+                       {
+                           tabOpponent[k].Draw(window);
+                       }
+                    }
                     if (maze.GetMazeElementAt(i, j) == Element.Hero)
                     {
                         hero.Draw(window);
                     }
-                    //Dessine les cases vides.
                     if (maze.GetMazeElementAt(i, j) == Element.None)
                     {
                         noneSprite = new Sprite(noneTexture);
                         noneSprite.Position = new Vector2f(i * DEFAULT_GAME_ELEMENT_WIDTH, j * DEFAULT_GAME_ELEMENT_HEIGHT);
                         window.Draw(noneSprite);
                     }
-                    //Dessine les ennemis.
-                    if (maze.GetMazeElementAt(i, j) == Element.Opponent)
-                    {
-                        for (int k = 0; k < tabOpponents.Length; k++)
-                        {
-                            tabOpponents[k].Draw(window);
-                        }
-                    }
-                    //Dessine l'étoile.
-                    if (maze.GetMazeElementAt(i,j) == Element.Star) 
-                    {
-                        theStar.Draw(window, i, j);
-                    }
                 }
             }
-            window.Draw(timeText);   //Dessine le temps de la partie.
+            theStar = new Star();
+            if (theStar.IsStarVisible())
+            {
+                maze.SetElementAt(8, 9, Element.Star);
+                if (!theStar.IsStarActivated())
+                {
+                    theStar.Draw(window, 8, 9);
+                }
+
+            }
+            //window.Draw(timeText);
         }
-        /// <summary>
-        /// Fonction qui appelle la fonction pour faire bouger le héros et qui active l'étoile si le héros passe dessus.
-        /// </summary>
-        /// <param name="direction"></param>
-        public void MoveHero (Direction direction)
+        public void HandleEndOfGame(EndGameResult result) { }
+        public void MoveHero(Direction direction)
         {
             if (direction == Direction.East)
             {
@@ -246,6 +172,10 @@ namespace CMIYC
                 }
             }
             hero.Move(maze, direction);
+            for (int i = 0; i < tabOpponent.Length; i++)
+            {
+                tabOpponent[i].Update(maze, hero, theStar.IsStarActivated());
+            }
         }
     }
 }
